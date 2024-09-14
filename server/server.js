@@ -16,19 +16,22 @@ app.use(express.json());
 app.use(fileUpload()); // Enable file uploads
 
 // Initialize Cohere API
-const cohere = new CohereClient(process.env.COHERE_API_KEY);
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY,
+});
 
 // Initialize Groq client
 const groq = new GroqClient({ apiKey: process.env.GROQ_API_KEY });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGODB_URI);
 
 // Define schema for knowledge base entries
 const KnowledgeEntrySchema = new mongoose.Schema({
   chatbotId: String,
   content: String,
-  embedding: [Number],
+  embedding: Object,
+  pdfEmbedding: Object,
 });
 
 const KnowledgeEntry = mongoose.model('KnowledgeEntry', KnowledgeEntrySchema);
@@ -52,21 +55,21 @@ class CohereEmbeddings {
     const response = await cohere.embed({
       texts: documents,
     });
-    return response.body.embeddings;
+    return response.embeddings;
   }
 
   async embedQuery(query) {
     const response = await cohere.embed({
       texts: [query],
     });
-    return response.body.embeddings[0];
+    return response.embeddings[0];
   }
 }
 
-const embeddings = new CohereEmbeddings();
+const getEmbeddings = new CohereEmbeddings();
 
 // Initialize vector store
-const vectorStore = new MongoDBAtlasVectorSearch(embeddings, {
+const vectorStore = new MongoDBAtlasVectorSearch(getEmbeddings, {
   collection: KnowledgeEntry,
   indexName: 'default',
   textKey: 'content',
@@ -115,8 +118,13 @@ app.get('/api/chatbots/:chatbotId/config', async (req, res) => {
 app.post('/api/knowledge', async (req, res) => {
   try {
     const { chatbotId, content } = req.body;
-    const embedding = await embeddings.embedQuery(content);
-    const entry = new KnowledgeEntry({ chatbotId, content, embedding });
+    const pdfData = await pdfParse(req.files.pdf);
+    const pdfContent = pdfData.text;
+
+    // Create embeddings for the extracted content
+    const pdfEmbedding = await getEmbeddings.embedDocuments([pdfContent]);
+    const embedding = await getEmbeddings.embedQuery(content);
+    const entry = new KnowledgeEntry({ chatbotId, content, embedding, pdfEmbedding });
     await entry.save();
     res.status(201).json({ message: 'Knowledge added successfully' });
   } catch (error) {
@@ -125,25 +133,25 @@ app.post('/api/knowledge', async (req, res) => {
 });
 
 // API endpoint to add knowledge from a PDF file
-app.post('/api/knowledge/pdf', async (req, res) => {
-  try {
-    const { chatbotId } = req.body;
-    if (!req.files || !req.files.pdf) {
-      return res.status(400).json({ message: 'PDF file is required' });
-    }
-    const pdfData = await pdfParse(req.files.pdf);
-    const content = pdfData.text;
+// app.post('/api/knowledge/pdf', async (req, res) => {
+//   try {
+//     const { chatbotId } = req.body;
+//     if (!req.files || !req.files.pdf) {
+//       return res.status(400).json({ message: 'PDF file is required' });
+//     }
+//     const pdfData = await pdfParse(req.files.pdf);
+//     const content = pdfData.text;
 
-    // Create embeddings for the extracted content
-    const embedding = await embeddings.embedDocuments([content]);
-    const entry = new KnowledgeEntry({ chatbotId, content, embedding });
-    await entry.save();
+//     // Create embeddings for the extracted content
+//     const embedding = await embeddings.embedDocuments([content]);
+//     const entry = new KnowledgeEntry({ chatbotId, content, embedding });
+//     await entry.save();
 
-    res.status(201).json({ message: 'Knowledge from PDF added successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding knowledge from PDF', error: error.message });
-  }
-});
+//     res.status(201).json({ message: 'Knowledge from PDF added successfully' });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error adding knowledge from PDF', error: error.message });
+//   }
+// });
 
 // API endpoint for chatbot interaction using Groq
 app.post('/api/chat/:chatbotId', async (req, res) => {
@@ -178,7 +186,7 @@ app.post('/api/chat/:chatbotId', async (req, res) => {
     const response = completion.choices[0].message.content;
     res.json({ response });
   } catch (error) {
-    res.status(500).json({ message: 'Error processing chat', error: error.message });
+    res.status(500).json({ message: 'Error processing chat', error: error.message});
   }
 });
 

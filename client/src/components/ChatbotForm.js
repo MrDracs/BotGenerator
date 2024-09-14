@@ -8,8 +8,7 @@ function ChatbotForm() {
   const [temperature, setTemperature] = useState(0.7);
   const [primaryColor, setPrimaryColor] = useState('#000000');
   const [fontFamily, setFontFamily] = useState('Arial');
-  const [fontSize, setFontSize] = useState(16);
-  const [pdfFile, setPdfFile] = useState(null);  // For handling PDF file upload
+  const [fontSize, setFontSize] = useState(16); // For handling PDF file upload
   const navigate = useNavigate();
 
   const createChatbot = async (e) => {
@@ -22,10 +21,6 @@ function ChatbotForm() {
     formData.append('primaryColor', primaryColor);
     formData.append('fontFamily', fontFamily);
     formData.append('fontSize', fontSize);
-    
-    if (pdfFile) {
-      formData.append('pdf', pdfFile);  // Append the selected PDF file to the form data
-    }
 
     try {
       const response = await axios.post('http://localhost:5000/api/chatbots', formData, {
@@ -109,15 +104,6 @@ function ChatbotForm() {
           />
         </div>
 
-        {/* File input for PDF upload */}
-        <div className="form-group">
-          <label>Upload Knowledge Base (PDF)</label>
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => setPdfFile(e.target.files[0])}  // Handle file selection
-          />
-        </div>
 
         <button type="submit">Create Chatbot</button>
       </form>

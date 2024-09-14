@@ -44,7 +44,7 @@ function ChatWithChatbot() {
       setChatHistory([...updatedHistory, { role: 'bot', content: botResponse }]);
       setMessage(''); // Reset input field
     } catch (error) {
-      setError('Error sending message to the chatbot.');
+      setError(`Error sending message to the chatbot: ${ error }`);
     } finally {
       setIsLoading(false);
     }
