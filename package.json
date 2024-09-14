@@ -2,6 +2,7 @@
   "name": "botgenerator",
   "version": "1.0.0",
   "description": "MERN stack Groq chatbot generator",
+  "type": "module",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@langchain/mongodb": "^0.0.6",
     "@project-lakechain/sentence-transformers": "^0.9.0",
+    
     "botgenerator": "file:",
     "cohere-ai": "^7.13.1",
     "cors": "^2.8.5",

@@ -7,10 +7,10 @@ import pdfParse from 'pdf-parse'; // For parsing PDFs
 import fileUpload from 'express-fileupload'; // For handling file uploads
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
 import 'dotenv/config';
+import { ConsoleCallbackHandler } from 'langchain/callbacks';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
 app.use(cors());
 app.use(express.json());
 app.use(fileUpload()); // Enable file uploads
@@ -24,7 +24,13 @@ const cohere = new CohereClient({
 const groq = new GroqClient({ apiKey: process.env.GROQ_API_KEY });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch(error => {
+  console.error('Error connecting to MongoDB:', error);
+});
 
 // Define schema for knowledge base entries
 const KnowledgeEntrySchema = new mongoose.Schema({
@@ -32,6 +38,7 @@ const KnowledgeEntrySchema = new mongoose.Schema({
   content: String,
   embedding: Object,
   pdfEmbedding: Object,
+  pdfContent: String, 
 });
 
 const KnowledgeEntry = mongoose.model('KnowledgeEntry', KnowledgeEntrySchema);
@@ -118,78 +125,174 @@ app.get('/api/chatbots/:chatbotId/config', async (req, res) => {
 app.post('/api/knowledge', async (req, res) => {
   try {
     const { chatbotId, content } = req.body;
-    const pdfData = await pdfParse(req.files.pdf);
-    const pdfContent = pdfData.text;
+    const pdfFile = req.files?.pdf;
+    
+    let pdfContent = '';
+    if (pdfFile) {
+      const pdfData = await pdfParse(pdfFile.data);
+      pdfContent = pdfData.text;
 
-    // Create embeddings for the extracted content
-    const pdfEmbedding = await getEmbeddings.embedDocuments([pdfContent]);
-    const embedding = await getEmbeddings.embedQuery(content);
-    const entry = new KnowledgeEntry({ chatbotId, content, embedding, pdfEmbedding });
-    await entry.save();
-    res.status(201).json({ message: 'Knowledge added successfully' });
+      // Create embeddings for the extracted PDF content
+      const pdfEmbedding = await getEmbeddings.embedDocuments([pdfContent]);
+      console.log('PDF Embedding:', pdfEmbedding);
+
+      // Save the new knowledge entry to the database
+      const entry = new KnowledgeEntry({ chatbotId, content, embedding: await getEmbeddings.embedQuery(content), pdfEmbedding, pdfContent });
+      await entry.save();
+
+      res.status(201).json({ message: 'Knowledge added successfully' });
+    } else {
+      // Handle cases where PDF is not provided
+      res.status(400).json({ message: 'PDF file is required' });
+    }
   } catch (error) {
+    console.error('Error adding knowledge:', error);
     res.status(500).json({ message: 'Error adding knowledge', error: error.message });
   }
 });
 
-// API endpoint to add knowledge from a PDF file
-// app.post('/api/knowledge/pdf', async (req, res) => {
-//   try {
-//     const { chatbotId } = req.body;
-//     if (!req.files || !req.files.pdf) {
-//       return res.status(400).json({ message: 'PDF file is required' });
-//     }
-//     const pdfData = await pdfParse(req.files.pdf);
-//     const content = pdfData.text;
+// Cosine Similarity Calculation Function
+function cosineSimilarity(vecA, vecB) {
+  if (!vecA || !vecB) {
+    console.error('One or both vectors are undefined.');
+    return 0; // Return 0 similarity if vectors are not defined
+  }
 
-//     // Create embeddings for the extracted content
-//     const embedding = await embeddings.embedDocuments([content]);
-//     const entry = new KnowledgeEntry({ chatbotId, content, embedding });
-//     await entry.save();
+  let dotProduct = 0.0;
+  let normA = 0.0;
+  let normB = 0.0;
 
-//     res.status(201).json({ message: 'Knowledge from PDF added successfully' });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error adding knowledge from PDF', error: error.message });
-//   }
-// });
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
 
-// API endpoint for chatbot interaction using Groq
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+function getEmbeddingToUse(document) {
+  return [document.pdfEmbedding.flat()];
+}
+
+// Wrapper function to perform similarity search
+async function similaritySearchWrapper(query, limit, options) {
+  try {
+    const queryEmbedding = await getEmbeddings.embedQuery(query);
+    console.log('Query Embedding:', queryEmbedding);
+
+    const knowledgeEntries = await KnowledgeEntry.find(options);
+
+    const results = knowledgeEntries
+      .map(entry => {
+        const embeddingsToUse = getEmbeddingToUse(entry);
+
+        if (!embeddingsToUse || embeddingsToUse.length === 0) {
+          console.warn('No valid embedding found for entry:', entry._id);
+          return null;
+        }
+        const similarities = embeddingsToUse.map(embedding => cosineSimilarity(queryEmbedding, embedding));
+        const maxSimilarity = Math.max(...similarities);
+
+        return { entry, similarity: maxSimilarity };
+      })
+      .filter(result => result !== null);
+
+    results.sort((a, b) => b.similarity - a.similarity);
+
+    console.log('Similarity Results:', results.slice(0, limit));
+    return results.slice(0, limit).map(result => result.entry);
+  } catch (error) {
+    console.error('Error during similarity search:', error);
+    throw error;
+  }
+}
+
+// API endpoint for chatbot processing with similarity search
 app.post('/api/chat/:chatbotId', async (req, res) => {
   try {
     const { chatbotId } = req.params;
     const { message, previousMessages = [] } = req.body;
 
-    // Retrieve chatbot configuration
     const config = await ChatbotConfig.findOne({ chatbotId });
     if (!config) {
       return res.status(404).json({ message: 'Chatbot configuration not found' });
     }
 
-    // Retrieve relevant information from the knowledge base
-    const relevantDocs = await vectorStore.similaritySearch(message, 3, { chatbotId });
-    const context = relevantDocs.map(doc => doc.pageContent).join('\n');
+    const relevantDocs = await similaritySearchWrapper(message, 3, { chatbotId });
+    console.log('Relevant Documents:', relevantDocs);
 
-    // Prepare messages array for Groq
+    const pdfContext = relevantDocs.map(doc => doc.pdfContent).join('\n');
+    const context = relevantDocs.map(doc => doc.content).concat(pdfContext).join('\n');
+    console.log('Context for Groq:', context);
+
     const messages = [
       { role: 'system', content: `${config.contextMessage}\nUse the following context to answer the user's question: ${context}` },
       ...previousMessages,
-      { role: 'user', content: message }
+      { role: 'user', content: message },
     ];
 
-    // Generate response using Groq
     const completion = await groq.chat.completions.create({
       messages: messages,
       model: 'mixtral-8x7b-32768',
       temperature: config.temperature,
     });
+    console.log('Groq Completion Response:', completion);
 
     const response = completion.choices[0].message.content;
     res.json({ response });
   } catch (error) {
-    res.status(500).json({ message: 'Error processing chat', error: error.message});
+    console.error('Error processing chat request:', error);
+    res.status(500).json({ message: 'Error processing chat', error: error.message });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+
+
+// import axios from 'axios';
+// app.post('/api/chat/:chatbotId', async (req, res) => {
+//   try {
+//     const { chatbotId } = req.params;
+//     const { message, previousMessages = [] } = req.body;
+
+//     // Retrieve chatbot configuration
+//     const config = await ChatbotConfig.findOne({ chatbotId });
+//     if (!config) {
+//       return res.status(404).json({ message: 'Chatbot configuration not found' });
+//     }
+
+//     // Retrieve relevant information from the knowledge base
+//     const relevantDocs = await vectorStore.similaritySearch(message, 3, { chatbotId });
+
+//     const context = relevantDocs.map(doc => doc.pageContent).join('\n');
+
+//     const messages = [
+//       { role: 'system', content: `${config.contextMessage}\nUse the following context to answer the user's question: ${context}` },
+//       ...previousMessages,
+//       { role: 'user', content: message }
+//     ];
+
+//     // Generate response using Groq
+//     const completion = await axios.post('https://groq.api/chat/completions', {
+//       messages,
+//       model: 'mixtral-8x7b-32768',
+//       temperature: config.temperature
+//     });
+
+//     const response = completion.data.choices[0].message.content;
+//     res.json({ response });
+//   } catch (error) {
+//     console.error('Network error:', error);  // Log the error for debugging
+//     if (error.response) {
+//       // Server responded with a status code outside the 2xx range
+//       res.status(error.response.status).json({ message: error.response.data });
+//     } else if (error.request) {
+//       // Request was made but no response received
+//       res.status(500).json({ message: 'No response from the external service', error: error.message });
+//     } else {
+//       // Other error occurred during request setup
+//       res.status(500).json({ message: 'Error sending message to chatbot', error: error.message });
+//     }
+//   }
+// });
