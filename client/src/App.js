@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ChatbotList from './components/ChatbotList';
 import ChatbotForm from './components/ChatbotForm';
 import KnowledgeForm from './components/KnowledgeForm';
-import Chatting from './components/Chatting';
 import EmbedOptions from './components/EmbedOptions';
+import ChatWithChatbot from './components/Chatting';
 import './App.css';  // Import the CSS file
+import './components/chatbot-widget.css'; // Import the CSS file
 
 function App() {
   return (
@@ -34,7 +35,7 @@ function App() {
             <Route path="/create" element={<ChatbotForm />} />
             <Route path="/add-knowledge/:chatbotId" element={<KnowledgeForm />} />
             <Route path="/embed/:chatbotId" element={<EmbedOptions />} />
-            <Route path="/chat/:chatbotId" element={<Chatting />} />
+            <Route path="/chat/:chatbotId" element={<ChatWithChatbot />} />
           </Routes>
         </main>
       </div>

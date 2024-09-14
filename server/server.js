@@ -227,14 +227,15 @@ app.post('/api/chat/:chatbotId', async (req, res) => {
     console.log('Context for Groq:', context);
 
     const messages = [
-      { role: 'system', content: `${config.contextMessage}\nUse the following context to answer the user's question: ${context}` },
+      { role: 'system', content: `DO NOT ANSWER IF THE MESSAGE IS OUT OF CONTEXT DEFINED, NOT EVEN MINOR HELP. Do NOT ANSWER Anything unrelated to the purpose of the conversation, just deny the existence of anything outside your context and usecase. Greetings like hello and bye should be responded with. ${config.contextMessage}\nUse only the following context to answer the user's question: ${context}` },
       ...previousMessages,
-      { role: 'user', content: message },
+      { role: 'user', content: `${message}` },
     ];
 
     const completion = await groq.chat.completions.create({
       messages: messages,
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-8b-instant',
+      // model: 'mixtral-8x7b-32768',
       temperature: config.temperature,
     });
     console.log('Groq Completion Response:', completion);
