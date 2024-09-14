@@ -39,9 +39,10 @@ function ChatWithChatbot() {
         message,
         previousMessages: updatedHistory,
       });
+      console.log(response.data);
 
       const botResponse = response.data.response;
-      setChatHistory([...updatedHistory, { role: 'bot', content: botResponse }]);
+      setChatHistory([...updatedHistory, { role: 'assistant', content: botResponse }]);
       setMessage(''); // Reset input field
     } catch (error) {
       setError(`Error sending message to the chatbot: ${ error }`);
