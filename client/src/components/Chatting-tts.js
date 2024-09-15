@@ -1,19 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import './chatbot-widget.css'; // Import the CSS file
 
-function ChatWithChatbot() {
+function ChatWithChatbotTTS() {
   const { chatbotId } = useParams();
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chatbotConfig, setChatbotConfig] = useState(null);
-  const [isTalking, setIsTalking] = useState(false); // Track avatar animation
-  const chatWindowRef = useRef(null); // Ref to chat window for auto-scrolling
+  const [isSpeaking, setIsSpeaking] = useState(false); // Tracks if the bot is speaking
 
   useEffect(() => {
     const fetchChatbotConfig = async () => {
@@ -48,11 +45,8 @@ function ChatWithChatbot() {
       setChatHistory([...updatedHistory, { role: 'assistant', content: botResponse }]);
       setMessage(''); // Clear input
 
-      // Trigger avatar animation
-      setIsTalking(true);
-      setTimeout(() => {
-        setIsTalking(false);
-      }, 3000); // Animation duration
+      // Trigger TTS and avatar animation
+      playBrowserTTS(botResponse);
     } catch (error) {
       setError(`Error sending message to the chatbot: ${error}`);
     } finally {
@@ -60,32 +54,35 @@ function ChatWithChatbot() {
     }
   };
 
-  useEffect(() => {
-    // Auto-scroll to the latest message
-    if (chatWindowRef.current) {
-      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+  const playBrowserTTS = (text) => {
+    // Check if the browser supports speech synthesis
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onstart = () => setIsSpeaking(true); // Start avatar speaking animation
+      utterance.onend = () => setIsSpeaking(false); // Stop animation when audio ends
+      speechSynthesis.speak(utterance);
+    } else {
+      console.error('Speech synthesis not supported');
     }
-  }, [chatHistory]);
+  };
 
   return (
     <div className="chat-container">
-      <h2>Chat with <span id="title">{chatbotConfig ? chatbotConfig.name : 'Chatbot'}</span></h2>
+      <h2>Chat with {chatbotConfig ? chatbotConfig.name : 'Chatbot'}</h2>
 
       {/* Avatar */}
       <img
         id="avatar"
-        src={isTalking ? `${process.env.PUBLIC_URL}/talk.gif` : `${process.env.PUBLIC_URL}/idle.png`}
+        src={isSpeaking ? `${process.env.PUBLIC_URL}/talk.gif` : `${process.env.PUBLIC_URL}/idle.png`}
         alt="Chatbot Avatar"
-        className={`avatar ${isTalking ? 'talking' : 'idle'}`}
+        className="avatar"
       />
 
       {/* Chat Window */}
-      <div className="chat-window" ref={chatWindowRef}>
+      <div className="chat-window">
         {chatHistory.map((chat, index) => (
-          <div key={index} className={`chat-bubble ${chat.role} animate`}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {chat.content}
-            </ReactMarkdown>
+          <div key={index} className={`chat-bubble ${chat.role}`}>
+            <p>{chat.content}</p>
           </div>
         ))}
 
@@ -93,7 +90,7 @@ function ChatWithChatbot() {
       </div>
 
       {/* Input Form */}
-      <form onSubmit={sendMessage} className="chat-input">
+      <form onSubmit={sendMessage} className="chat-input-form">
         <input
           type="text"
           value={message}
@@ -111,4 +108,4 @@ function ChatWithChatbot() {
   );
 }
 
-export default ChatWithChatbot;
+export default ChatWithChatbotTTS;

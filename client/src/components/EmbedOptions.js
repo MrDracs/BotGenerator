@@ -21,16 +21,33 @@ function EmbedOptions() {
 
   if (!config) return <div>Loading...</div>;
 
-  const iframeEmbed = `<iframe src="http://localhost:3000/chat/${chatbotId}" width="300" height="400" frameborder="0"></iframe>`;
-  const scriptEmbed = `<script src="http://localhost:3000/chatbot-widget.js" data-chatbot-id="${chatbotId}"></script>`;
+  const iframeEmbed = `<div class="side-bar-fs"><iframe src="http://localhost:3000/chat/${chatbotId}" width='80%' height="100%" frameborder='none'></iframe></div>
+`;
+  const cssEmbed = `.side-bar-fs{
+    width: 30vw;
+    height:95vh;
+    margin: auto;
+    margin-left: 69vw;
+    position: relative;
+    background: none;
+    overflow: hidden;
+    z-index: 100;
+}
+iframe{
+    margin: auto;
+    position: relative;
+    background-color: none;
+    width: 100%;
+    height: 100%;
+}`;
 
   return (
     <div>
       <h2>Embed Your Chatbot: {config.name}</h2>
       <h3>iframe Embed</h3>
       <textarea readOnly value={iframeEmbed} />
-      <h3>Script Embed</h3>
-      <textarea readOnly value={scriptEmbed} />
+      <h3>CSS Embed</h3>
+      <textarea readOnly value={cssEmbed} />
     </div>
   );
 }
