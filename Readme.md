@@ -75,7 +75,7 @@ Conversify is built on a full-stack JavaScript architecture using the MERN stack
 1. **Clone the Repository**:
    - Open your terminal and run:
      ```bash
-     git clone [REPO_URL]
+     git clone https://github.com/MrDracs/BotGenerator.git
      cd BotGenerator
      ```
 
