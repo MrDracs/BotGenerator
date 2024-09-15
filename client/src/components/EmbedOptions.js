@@ -23,8 +23,7 @@ function EmbedOptions() {
     return <div>Loading...</div>;
   }
 
-  const iframeEmbed = `<div class="side-bar-fs"><iframe src="http://localhost:3000/chat/${chatbotId}" width='80%' height="100%" frameborder='none'></iframe></div>
-`;
+  const iframeEmbed = `<div class="side-bar-fs"><iframe src="http://localhost:3000/chat/${chatbotId}" width='80%' height="100%" frameborder='none'></iframe></div>`;
   const cssEmbed = `.side-bar-fs{
     width: 30vw;
     height:95vh;
