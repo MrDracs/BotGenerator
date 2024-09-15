@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import './chatbot-widget.css'; // Import the CSS file
 
 function ChatWithChatbot() {
-  const { chatbotId } = useParams(); // Retrieve chatbotId from URL params
+  const { chatbotId } = useParams();
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chatbotConfig, setChatbotConfig] = useState(null);
+  const [isTalking, setIsTalking] = useState(false); // Track avatar animation
+  const chatWindowRef = useRef(null); // Ref to chat window for auto-scrolling
 
   useEffect(() => {
-    // Fetch chatbot configuration when the component mounts
     const fetchChatbotConfig = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/chatbots/${chatbotId}/config`);
@@ -39,33 +43,57 @@ function ChatWithChatbot() {
         message,
         previousMessages: updatedHistory,
       });
-      console.log(response.data);
 
       const botResponse = response.data.response;
       setChatHistory([...updatedHistory, { role: 'assistant', content: botResponse }]);
-      setMessage(''); // Reset input field
+      setMessage(''); // Clear input
+
+      // Trigger avatar animation
+      setIsTalking(true);
+      setTimeout(() => {
+        setIsTalking(false);
+      }, 3000); // Animation duration
     } catch (error) {
-      setError(`Error sending message to the chatbot: ${ error }`);
+      setError(`Error sending message to the chatbot: ${error}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    // Auto-scroll to the latest message
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
+
   return (
     <div className="chat-container">
-      <h2>Chat with {chatbotConfig ? chatbotConfig.name : 'Chatbot'}</h2>
+      <h2>Chat with <span id="title">{chatbotConfig ? chatbotConfig.name : 'Chatbot'}</span></h2>
 
-      <div className="chat-window">
+      {/* Avatar */}
+      <img
+        id="avatar"
+        src={isTalking ? `${process.env.PUBLIC_URL}/talk.gif` : `${process.env.PUBLIC_URL}/idle.png`}
+        alt="Chatbot Avatar"
+        className={`avatar ${isTalking ? 'talking' : 'idle'}`}
+      />
+
+      {/* Chat Window */}
+      <div className="chat-window" ref={chatWindowRef}>
         {chatHistory.map((chat, index) => (
-          <div key={index} className={`chat-bubble ${chat.role}`}>
-            <p>{chat.content}</p>
+          <div key={index} className={`chat-bubble ${chat.role} animate`}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {chat.content}
+            </ReactMarkdown>
           </div>
         ))}
 
         {isLoading && <p>Loading...</p>}
       </div>
 
-      <form onSubmit={sendMessage} className="chat-input-form">
+      {/* Input Form */}
+      <form onSubmit={sendMessage} className="chat-input">
         <input
           type="text"
           value={message}
@@ -81,7 +109,6 @@ function ChatWithChatbot() {
       {error && <p className="error">{error}</p>}
     </div>
   );
-  
 }
 
 export default ChatWithChatbot;
