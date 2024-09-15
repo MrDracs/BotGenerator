@@ -6,7 +6,7 @@ body {
   }
   
   .App {
-    max-width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background: #fff;
@@ -112,6 +112,62 @@ body {
   button:hover {
     background-color: #0056b3;
   }
-  .hide-ui-elements .navbar {
-    display: none;
+  
+  .chat-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
   }
+  
+  .chat-window {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 400px;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+  }
+  
+  .chat-bubble {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 10px;
+  }
+  
+  .chat-bubble.user {
+    background-color: #007bff;
+    color: white;
+    text-align: right;
+  }
+  
+  .chat-bubble.bot {
+    background-color: #f1f1f1;
+    color: black;
+  }
+  
+  .chat-input-form {
+    display: flex;
+  }
+  
+  .chat-input-form input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .chat-input-form button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .chat-input-form button:disabled {
+    background-color: #ccc;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+  

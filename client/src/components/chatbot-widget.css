@@ -21,7 +21,7 @@
     max-width: 90% !important;
     min-height: 100%;
     margin: 0 auto !important;
-    min-width: none;
+    min-width: 90%;
     background:linear-gradient(70deg, rgba(0, 132, 255, 0.877) 0%, rgba(166, 0, 255, 0.751) 100%);
     border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -46,7 +46,14 @@
     border-radius: 50%;
     transition: opacity 0.2s ease;
   }
-  
+  .avatar.talking{
+    display: block;
+    width: 25%;
+    height: 25%;
+    margin: 2em auto;
+    border-radius: 50%;
+    transition: opacity 0.2s ease;
+  }
   /* Chat window styles */
   .chat-window {
     height: 55vh;

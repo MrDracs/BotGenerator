@@ -19,7 +19,9 @@ function EmbedOptions() {
     fetchConfig();
   }, [chatbotId]);
 
-  if (!config) return <div>Loading...</div>;
+  if (!config) {
+    return <div>Loading...</div>;
+  }
 
   const iframeEmbed = `<div class="side-bar-fs"><iframe src="http://localhost:3000/chat/${chatbotId}" width='80%' height="100%" frameborder='none'></iframe></div>
 `;
