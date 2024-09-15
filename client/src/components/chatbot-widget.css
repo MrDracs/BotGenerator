@@ -56,7 +56,7 @@
   }
   /* Chat window styles */
   .chat-window {
-    height: 55vh;
+    height: 40vh;
     max-width: 95%;
     margin: auto;
     max-height: 100%;
@@ -186,6 +186,9 @@
   @media screen and (max-width: 600px) {
     .chat-container {
       padding: 10px;
+    }
+    .chat-window{
+      height: 52vh;
     }
   
     .chat-bubble {

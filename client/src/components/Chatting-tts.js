@@ -90,7 +90,7 @@ function ChatWithChatbotTTS() {
       </div>
 
       {/* Input Form */}
-      <form onSubmit={sendMessage} className="chat-input-form">
+      <form onSubmit={sendMessage} className="chat-input">
         <input
           type="text"
           value={message}
