@@ -23,7 +23,7 @@ function ChatbotForm() {
     formData.append('fontSize', fontSize);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chatbots', formData, {
+      const response = await axios.post('https://botgenerator.onrender.com/api/chatbots', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'  // Important for sending files
         }

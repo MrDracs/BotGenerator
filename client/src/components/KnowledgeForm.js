@@ -17,7 +17,7 @@ function KnowledgeForm() {
     formData.append('content', content);
     formData.append('pdf', pdfFile);  // Append the selected file
     try {
-      await axios.post('http://localhost:5000/api/knowledge', formData, {
+      await axios.post('https://botgenerator.onrender.com/api/knowledge', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'  // Important for sending files
         }

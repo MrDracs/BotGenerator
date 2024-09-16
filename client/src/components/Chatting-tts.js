@@ -15,7 +15,7 @@ function ChatWithChatbotTTS() {
   useEffect(() => {
     const fetchChatbotConfig = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/chatbots/${chatbotId}/config`);
+        const response = await axios.get(`https://botgenerator.onrender.com/api/chatbots/${chatbotId}/config`);
         setChatbotConfig(response.data);
       } catch (error) {
         setError('Error fetching chatbot configuration');
@@ -36,7 +36,7 @@ function ChatWithChatbotTTS() {
     setChatHistory(updatedHistory);
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/chat/${chatbotId}`, {
+      const response = await axios.post(`https://botgenerator.onrender.com/api/chat/${chatbotId}`, {
         message,
         previousMessages: updatedHistory,
       });

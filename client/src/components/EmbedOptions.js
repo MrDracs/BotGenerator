@@ -10,7 +10,7 @@ function EmbedOptions() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/chatbots/${chatbotId}/config`);
+        const response = await axios.get(`hhttps://botgenerator.onrender.com/api/chatbots/${chatbotId}/config`);
         setConfig(response.data);
       } catch (error) {
         console.error('Error fetching chatbot configuration:', error);

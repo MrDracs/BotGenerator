@@ -19,7 +19,7 @@ const DeleteChatbot = () => {
     setSuccessMessage(null);
 
     try {
-      await axios.delete(`http://localhost:5000/api/chat/${chatbotId}`);
+      await axios.delete(`https://botgenerator.onrender.com/api/chat/${chatbotId}`);
       setSuccessMessage(`Chatbot with ID ${chatbotId} deleted successfully!`);
       setTimeout(() => navigate('/admin'), 2000); // Redirect after 2 seconds
     } catch (err) {

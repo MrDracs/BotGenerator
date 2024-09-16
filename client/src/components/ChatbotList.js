@@ -9,7 +9,7 @@ function ChatbotList() {
   useEffect(() => {
     const fetchChatbots = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/chatbots');
+        const response = await axios.get('https://botgenerator.onrender.com/api/chatbots');
         setChatbots(response.data);
       } catch (error) {
         console.error('Error fetching chatbots:', error);
