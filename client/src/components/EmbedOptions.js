@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-
+import { Link } from 'react-router-dom';
 function EmbedOptions() {
   const [config, setConfig] = useState(null);
   const { chatbotId } = useParams();
@@ -49,8 +49,10 @@ iframe{
       <textarea readOnly value={iframeEmbed} />
       <h3>CSS Embed</h3>
       <textarea readOnly value={cssEmbed} />
+      <Link to={`/chat/${chatbotId}/delete`}>Delete Chatbot</Link>
     </div>
   );
+  
 }
 
 export default EmbedOptions;

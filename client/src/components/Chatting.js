@@ -69,7 +69,7 @@ function ChatWithChatbot() {
 
   return (
     <div className="chat-container">
-      <h2>Chat with <span id="title">{chatbotConfig ? chatbotConfig.name : 'Chatbot'}</span></h2>
+      <h2 style={{color: '#ffffff', fontSize:'1.5em'}}>Chat with <span id="title">{chatbotConfig ? chatbotConfig.name : 'Chatbot'}</span></h2>
 
       {/* Avatar */}
       <img

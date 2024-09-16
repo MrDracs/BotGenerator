@@ -24,7 +24,7 @@ function ChatbotList() {
       <ul>
         {chatbots.map(chatbot => (
           <li key={chatbot.chatbotId}>
-            <Link to={`/embed/${chatbot.chatbotId}`}>{chatbot.name}</Link>
+            <Link to={`/embed/${chatbot.chatbotId}`}>{chatbot.name}{chatbot.chatbotId}</Link>
           </li>
         ))}
       </ul>

@@ -207,7 +207,25 @@ async function similaritySearchWrapper(query, limit, options) {
     throw error;
   }
 }
+app.delete('/api/chat/:chatbotId', async (req, res) => {
+  try {
+    const { chatbotId } = req.params;
 
+    // Delete the chatbot configuration
+    const configDeletionResult = await ChatbotConfig.deleteOne({ chatbotId });
+    if (configDeletionResult.deletedCount === 0) {
+      return res.status(404).json({ message: 'Chatbot configuration not found' });
+    }
+
+    // Delete associated knowledge entries
+    await KnowledgeEntry.deleteMany({ chatbotId });
+
+    res.status(200).json({ message: 'Chatbot and associated knowledge entries deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting chatbot:', error);
+    res.status(500).json({ message: 'Error deleting chatbot', error: error.message });
+  }
+});
 // API endpoint for chatbot processing with similarity search
 app.post('/api/chat/:chatbotId', async (req, res) => {
   try {
@@ -247,53 +265,3 @@ app.post('/api/chat/:chatbotId', async (req, res) => {
     res.status(500).json({ message: 'Error processing chat', error: error.message });
   }
 });
-
-
-
-
-// import axios from 'axios';
-// app.post('/api/chat/:chatbotId', async (req, res) => {
-//   try {
-//     const { chatbotId } = req.params;
-//     const { message, previousMessages = [] } = req.body;
-
-//     // Retrieve chatbot configuration
-//     const config = await ChatbotConfig.findOne({ chatbotId });
-//     if (!config) {
-//       return res.status(404).json({ message: 'Chatbot configuration not found' });
-//     }
-
-//     // Retrieve relevant information from the knowledge base
-//     const relevantDocs = await vectorStore.similaritySearch(message, 3, { chatbotId });
-
-//     const context = relevantDocs.map(doc => doc.pageContent).join('\n');
-
-//     const messages = [
-//       { role: 'system', content: `${config.contextMessage}\nUse the following context to answer the user's question: ${context}` },
-//       ...previousMessages,
-//       { role: 'user', content: message }
-//     ];
-
-//     // Generate response using Groq
-//     const completion = await axios.post('https://groq.api/chat/completions', {
-//       messages,
-//       model: 'mixtral-8x7b-32768',
-//       temperature: config.temperature
-//     });
-
-//     const response = completion.data.choices[0].message.content;
-//     res.json({ response });
-//   } catch (error) {
-//     console.error('Network error:', error);  // Log the error for debugging
-//     if (error.response) {
-//       // Server responded with a status code outside the 2xx range
-//       res.status(error.response.status).json({ message: error.response.data });
-//     } else if (error.request) {
-//       // Request was made but no response received
-//       res.status(500).json({ message: 'No response from the external service', error: error.message });
-//     } else {
-//       // Other error occurred during request setup
-//       res.status(500).json({ message: 'Error sending message to chatbot', error: error.message });
-//     }
-//   }
-// });
