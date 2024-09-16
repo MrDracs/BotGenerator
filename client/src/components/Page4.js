@@ -124,7 +124,7 @@ iframe {
       <p>We need more information to tailor the agent perfectly to your needs.</p>
       <div className="form-container">
         <div className="form-left">
-          <img src="./asset/images/document.png" alt="Document Icon" className="document-icon" />
+          <img src="./asset/images/Document.png" alt="Document Icon" className="document-icon" />
         </div>
 
         {step === 1 && (
