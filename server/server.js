@@ -6,12 +6,11 @@ import { CohereClient } from 'cohere-ai'; // Import Cohere
 import pdfParse from 'pdf-parse'; // For parsing PDFs
 import fileUpload from 'express-fileupload'; // For handling file uploads
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
-import 'dotenv/config';
-import { ConsoleCallbackHandler } from 'langchain/callbacks';
+import 'dotenv/config';;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors());
+app.use(cors({ origin: 'https://conversify-9jzj.onrender.com' }));
 app.use(express.json());
 app.use(fileUpload()); // Enable file uploads
 
