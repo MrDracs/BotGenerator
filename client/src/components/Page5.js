@@ -10,7 +10,7 @@ const Page5 = () => {
             <p>Here is a live preview of our chatbot in action. Feel free to interact and customize the experience.</p>
           </div>
           <div className="side-bar-fs">
-            <iframe className='iframe' title="Chatbot Preview" src="http://localhost:3000/chat/66e5b818f161486041c6067d" width="80%" height="100%" frameBorder="none"></iframe>
+            <iframe className='iframe' title="Chatbot Preview" src="https://conversify-9jzj.onrender.com/chat/66e5b818f161486041c6067d" width="80%" height="100%" frameBorder="none"></iframe>
           </div>
         </div>
       </section>
