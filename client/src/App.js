@@ -69,13 +69,13 @@ function RouteSwitch() {
       <div className={`App ${isAdminRoute ? 'admin-view' : ''}`}>
         <main className="container">
           <Routes>
-            <Route path="/admin" element={<ChatbotList />} />
-            <Route path="/create" element={<ChatbotForm />} />
-            <Route path="/add-knowledge/:chatbotId" element={<KnowledgeForm />} />
-            <Route path="/embed/:chatbotId" element={<EmbedOptions />} />
-            <Route path="/chat/:chatbotId" element={<ChatWithChatbot />} />
-            <Route path="/chat/:chatbotId/tts" element={<ChatWithChatbotTTS />} />
-            <Route path="/chat/:chatbotId/delete" element={<DeleteChatbot />} />
+            <Route path="https://conversify-9jzj.onrender.com/admin" element={<ChatbotList />} />
+            <Route path="https://conversify-9jzj.onrender.com/create" element={<ChatbotForm />} />
+            <Route path="https://conversify-9jzj.onrender.com/add-knowledge/:chatbotId" element={<KnowledgeForm />} />
+            <Route path="https://conversify-9jzj.onrender.com/embed/:chatbotId" element={<EmbedOptions />} />
+            <Route path="https://conversify-9jzj.onrender.com/chat/:chatbotId" element={<ChatWithChatbot />} />
+            <Route path="https://conversify-9jzj.onrender.com/chat/:chatbotId/tts" element={<ChatWithChatbotTTS />} />
+            <Route path="https://conversify-9jzj.onrender.com/chat/:chatbotId/delete" element={<DeleteChatbot />} />
           </Routes>
         </main>
       </div>
