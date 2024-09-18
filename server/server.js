@@ -10,7 +10,7 @@ import 'dotenv/config';;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors({ origin: 'https://conversify-9jzj.onrender.com' },
+app.use(cors({ origin: 'https://conversify-buildagents.onrender.com' },
   { method : 'GET,POST,PUT,DELETE,OPTIONS' }));
 
   app.use(express.json());
