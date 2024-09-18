@@ -10,8 +10,10 @@ import 'dotenv/config';;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors({ origin: 'https://conversify-9jzj.onrender.com' }));
-app.use(express.json());
+app.use(cors({ origin: 'https://conversify-9jzj.onrender.com' },
+  { method : 'GET,POST,PUT,DELETE,OPTIONS' }));
+
+  app.use(express.json());
 app.use(fileUpload()); // Enable file uploads
 
 // Initialize Cohere API
