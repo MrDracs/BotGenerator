@@ -30,6 +30,7 @@
     "express-rate-limit": "^7.4.0",
     "groq-sdk": "^0.7.0",
     "langchain": "^0.2.19",
+    "llamaindex": "^0.6.2",
     "mongoose": "^8.6.2",
     "pdf-parse": "^1.1.1",
     "react-markdown": "^9.0.1",

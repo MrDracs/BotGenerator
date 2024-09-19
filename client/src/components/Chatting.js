@@ -27,39 +27,47 @@ function ChatWithChatbot() {
 
     fetchChatbotConfig();
   }, [chatbotId]);
-
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-
+  
     setIsLoading(true);
     setError(null);
-
+  
     const updatedHistory = [...chatHistory, { role: 'user', content: message }];
     setChatHistory(updatedHistory);
-
+  
     try {
       const response = await axios.post(`http://localhost:5000/api/chat/${chatbotId}`, {
         message,
         previousMessages: updatedHistory,
       });
-
-      const botResponse = response.data.response;
+  
+      // Get the response text
+      const botResponse = response.data.animationMessage.parts.map(part => part.text).join(' ');
       setChatHistory([...updatedHistory, { role: 'assistant', content: botResponse }]);
       setMessage(''); // Clear input
-
+  
       // Trigger avatar animation
       setIsTalking(true);
       setTimeout(() => {
         setIsTalking(false);
       }, 3000); // Animation duration
+  
+      // Handle ticket message
+      if (response.data.ticketMessage) {
+        // Show ticket message
+        setChatHistory([...updatedHistory, { role: 'assistant', content: response.data.ticketMessage }]);
+      }
+  
     } catch (error) {
-      setError(`Error sending message to the chatbot: ${error}`);
+      setError(`Error sending message to the chatbot: ${error.message || error}`);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  
   useEffect(() => {
     // Auto-scroll to the latest message
     if (chatWindowRef.current) {
