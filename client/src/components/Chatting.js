@@ -18,7 +18,7 @@ function ChatWithChatbot() {
   useEffect(() => {
     const fetchChatbotConfig = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/chatbots/${chatbotId}/config`);
+        const response = await axios.get(`http://localhost:5000/api/chatbots/${chatbotId}/config`);
         console.log(response.data);
         setChatbotConfig(response.data);
       } catch (error) {
@@ -40,7 +40,7 @@ function ChatWithChatbot() {
     setChatHistory(updatedHistory);
 
     try {
-      const response = await axios.post(`http://localhost:4000/api/chat/${chatbotId}`, {
+      const response = await axios.post(`http://localhost:5000/api/chat/${chatbotId}`, {
         message,
         previousMessages: updatedHistory,
       });

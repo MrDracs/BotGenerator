@@ -76,7 +76,6 @@ function RouteSwitch() {
             <Route path="/add-knowledge/:chatbotId" element={<KnowledgeForm />} />
             <Route path="/embed/:chatbotId" element={<EmbedOptions />} />
             <Route path="/chat/:chatbotId" element={<ChatWithChatbot />} />
-            <Route path="/chat/:chatbotId/3d" element={<Canvas3d />} />
             <Route path="/chat/:chatbotId/tts" element={<ChatWithChatbotTTS />} />
             <Route path="/chat/:chatbotId/delete" element={<DeleteChatbot />} />
           </Routes>

@@ -31,7 +31,7 @@ const Page4 = () => {
     };
 
     // Send data to the API (chatbot creation)
-    fetch('https://botgenerator.onrender.com/api/chatbots', {
+    fetch('http://localhost:5000/api/chatbots', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const Page4 = () => {
     formData.append('content', specifyQuestions);
     formData.append('pdf', pdfFile);
 
-    fetch('https://botgenerator.onrender.com/api/knowledge', {
+    fetch('http://localhost:5000/api/knowledge', {
       method: 'POST',
       body: formData,
     })
@@ -88,7 +88,7 @@ const Page4 = () => {
 
   // Step 3: Load Embed Options
   const loadEmbedOptions = () => {
-    fetch(`https://botgenerator.onrender.com/api/chatbots/${chatbotId}/config`)
+    fetch(`http://localhost:5000/api/chatbots/${chatbotId}/config`)
       .then(response => response.json())
       .then(data => {
         const iframeEmbed = `<div class="side-bar-fs"><iframe src="https://conversify-9jzj.onrender.com/chat/${chatbotId}" width='80%' height="100%" frameborder='none'></iframe></div>`;
