@@ -6,15 +6,31 @@ import { CohereClient } from 'cohere-ai'; // Import Cohere
 import pdfParse from 'pdf-parse'; // For parsing PDFs
 import fileUpload from 'express-fileupload'; // For handling file uploads
 import { MongoDBAtlasVectorSearch } from "@langchain/mongodb";
-import 'dotenv/config';;
+import 'dotenv/config';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+// Get the directory name of the current module
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use(cors({ origin: 'https://conversify-buildagents.onrender.com' },
-  { method : 'GET,POST,PUT,DELETE,OPTIONS' }));
+app.use(cors({
+  origin: [
+    'https://botgenerator.onrender.com',
+    'http://localhost:4000',
+  ],
+  credentials: true,
+  methods: 'GET,POST,PUT,DELETE,OPTIONS'
+}));
 
-  app.use(express.json());
+app.use(express.json());
 app.use(fileUpload()); // Enable file uploads
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, './client/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './client/build/index.html'));
+});
 
 // Initialize Cohere API
 const cohere = new CohereClient({
