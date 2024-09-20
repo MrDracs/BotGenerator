@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Link, Navigate } from 'react-router-dom';
 import ChatbotList from './components/ChatbotList';
 import ChatbotForm from './components/ChatbotForm';
 import KnowledgeForm from './components/KnowledgeForm';
@@ -13,6 +13,14 @@ import Page4 from './components/Page4';
 import Page5 from './components/Page5';
 import DeleteChatbot from './components/DeleteChatbot';
 import './App.css';  // Import the CSS file
+import Login from './components/login';
+import Signup from './components/signup';
+
+// PrivateRoute component to protect admin routes
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem('token'); // Get token from localStorage
+  return token ? children : <Navigate to="/login" />;
+}
 
 function App() {
   return (
@@ -25,12 +33,13 @@ function App() {
 // Wrapper component to conditionally render UI elements and manage scrolling
 function RouteSwitch() {
   const location = useLocation();
-  const isHomeRoute = location.pathname === '/';  // Check if it's the home route
+  const isHomeRoute = location.pathname === '/'; // Check if it's the home route
   const isChatRoute = location.pathname.startsWith('/chat');
-  const isAdminRoute = location.pathname.startsWith('/create') ||
+  const isAdminRoute = location.pathname.startsWith('/admin') || 
+                       location.pathname.startsWith('/create') ||
                        location.pathname.startsWith('/add-knowledge') ||
                        location.pathname.startsWith('/embed') ||
-                       location.pathname.includes('/chat/') && location.pathname.endsWith('/delete');  // Admin routes
+                       (location.pathname.includes('/chat/') && location.pathname.endsWith('/delete')); // Admin routes
 
   useEffect(() => {
     if (isChatRoute) {
@@ -42,7 +51,7 @@ function RouteSwitch() {
 
   return (
     <div>
-      {!isChatRoute && !isAdminRoute && (  // Only show this for non-chat and non-admin routes
+      {!isChatRoute && !isAdminRoute && ( // Only show this for non-chat and non-admin routes
         <div className='Home'>
           <Page1 />
           <Page2 />
@@ -69,13 +78,44 @@ function RouteSwitch() {
       <div className={`App ${isAdminRoute ? 'admin-view' : ''}`}>
         <main className="container">
           <Routes>
-            <Route path="/admin" element={<ChatbotList />} />
-            <Route path="/create" element={<ChatbotForm />} />
-            <Route path="/add-knowledge/:chatbotId" element={<KnowledgeForm />} />
-            <Route path="/embed/:chatbotId" element={<EmbedOptions />} />
-            <Route path="/chat/:chatbotId" element={<ChatWithChatbot />} />
-            <Route path="/chat/:chatbotId/tts" element={<ChatWithChatbotTTS />} />
-            <Route path="/chat/:chatbotId/delete" element={<DeleteChatbot />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/admin" element={
+              <PrivateRoute>
+                <ChatbotList />
+              </PrivateRoute>
+            } />
+            <Route path="/create" element={
+              <PrivateRoute>
+                <ChatbotForm />
+              </PrivateRoute>
+            } />
+            <Route path="/add-knowledge/:chatbotId" element={
+              <PrivateRoute>
+                <KnowledgeForm />
+              </PrivateRoute>
+            } />
+            <Route path="/embed/:chatbotId" element={
+              <PrivateRoute>
+                <EmbedOptions />
+              </PrivateRoute>
+            } />
+            <Route path="/chat/:chatbotId" element={
+              <PrivateRoute>
+                <ChatWithChatbot />
+              </PrivateRoute>
+            } />
+            <Route path="/chat/:chatbotId/tts" element={
+              <PrivateRoute>
+                <ChatWithChatbotTTS />
+              </PrivateRoute>
+            } />
+            <Route path="/chat/:chatbotId/delete" element={
+              <PrivateRoute>
+                <DeleteChatbot />
+              </PrivateRoute>
+            } />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
       </div>
