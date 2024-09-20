@@ -79,6 +79,7 @@ function RouteSwitch() {
         <main className="container">
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route index ="/signup" element={<Signup />} />
             <Route path="/admin" element={
               <PrivateRoute>
                 <ChatbotList />
