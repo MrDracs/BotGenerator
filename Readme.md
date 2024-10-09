@@ -146,3 +146,10 @@ If you have any questions or run into any issues, feel free to reach out to our 
 ---
 
 Now you're all set to bring Conversify's chatbots to life on your website! 🎉🤖
+
+---
+
+## **Contributors** 🤝
+- [Ayush Sharma](github.com/ayusharma03)
+- [Chirag Singh](github.com/chiragdhouni)
+- [Rohit Kushwaha](github.com/MrDracs)
